@@ -130,6 +130,16 @@ if (isLocalSrcLogo) {
                 <Search
                     client:load
                 />
+                {import.meta.env.DEV && (
+                    <a
+                        href={url("/admin/editor/")}
+                        aria-label="文章编辑"
+                        title="文章编辑"
+                        class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90 inline-flex items-center justify-center"
+                    >
+                        <Icon name="material-symbols:edit-square-outline-rounded" is:inline class="text-[1.25rem]"></Icon>
+                    </a>
+                )}
                 {musicPlayerConfig.showInNavbar && (
                     <button aria-label={i18n(I18nKey.music)} class="btn-plain scale-animation rounded-lg h-11 w-11 active:scale-90" id="music-player-switch">
                         <Icon name="material-symbols:music-note-rounded" is:inline class="text-[1.25rem]"></Icon>

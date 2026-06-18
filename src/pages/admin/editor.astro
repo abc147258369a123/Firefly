@@ -1,0 +1,776 @@
+---
+import { Icon } from "astro-icon/components";
+import { siteConfig } from "@/config";
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>文章编辑 - {siteConfig.title}</title>
+  </head>
+  <body>
+    <div class="yuque-editor">
+      <aside class="rail">
+        <a class="rail-logo" href="/" title="返回博客">
+          <Icon name="material-symbols:home-rounded" />
+        </a>
+        <button class="rail-btn active" type="button" title="文档">
+          <Icon name="material-symbols:menu-book-outline-rounded" />
+        </button>
+        <button class="rail-btn" id="rail-new" type="button" title="新建">
+          <Icon name="material-symbols:add-rounded" />
+        </button>
+      </aside>
+
+      <aside class="library">
+        <header class="library-head">
+          <div>
+            <div class="workspace">Firefly</div>
+            <h1>文章库</h1>
+          </div>
+          <button id="editor-new" class="round-btn" type="button" title="新建文章">
+            <Icon name="material-symbols:add-rounded" />
+          </button>
+        </header>
+        <label class="search">
+          <Icon name="material-symbols:search-rounded" />
+          <input id="editor-search" placeholder="搜索文章" />
+        </label>
+        <nav class="post-list" id="editor-post-list"></nav>
+      </aside>
+
+      <main class="workspace-main">
+        <header class="topbar">
+          <div class="doc-info">
+            <input id="post-title" class="title-input" placeholder="未命名文章" />
+            <div class="doc-status" id="editor-status">正在连接本地编辑服务...</div>
+          </div>
+          <div class="toolbar">
+            <button id="editor-refresh" class="tool-btn" type="button">
+              <Icon name="material-symbols:refresh-rounded" />
+            </button>
+            <button id="meta-toggle" class="tool-btn" type="button">
+              <Icon name="material-symbols:tune-rounded" />
+              信息
+            </button>
+            <button id="editor-save" class="save-btn" type="button">
+              <Icon name="material-symbols:save-outline-rounded" />
+              保存
+            </button>
+          </div>
+        </header>
+
+        <section class="meta-panel collapsed" id="meta-panel">
+          <label class="span-2">文章路径
+            <input id="post-path" placeholder="my-post.md 或 guide/index.md" />
+          </label>
+          <label>发布日期
+            <input id="post-published" type="date" />
+          </label>
+          <label>更新日期
+            <input id="post-updated" type="date" />
+          </label>
+          <label>分类
+            <input id="post-category" placeholder="例如：随笔" />
+          </label>
+          <label>语言
+            <input id="post-lang" placeholder="zh-CN" />
+          </label>
+          <label class="span-2">标签
+            <input id="post-tags" placeholder="Markdown, 日常" />
+          </label>
+          <label class="span-2">封面图
+            <input id="post-image" placeholder="./cover.avif 或 /assets/..." />
+          </label>
+          <label class="span-4">摘要
+            <input id="post-description" placeholder="这句话会显示在博客首页和文章列表里" />
+          </label>
+          <label>作者
+            <input id="post-author" />
+          </label>
+          <label>来源链接
+            <input id="post-sourceLink" />
+          </label>
+          <label>许可证名称
+            <input id="post-licenseName" />
+          </label>
+          <label>许可证链接
+            <input id="post-licenseUrl" />
+          </label>
+          <label>访问密码
+            <input id="post-password" />
+          </label>
+          <label>密码提示
+            <input id="post-passwordHint" />
+          </label>
+          <div class="toggles span-2">
+            <label><input id="post-draft" type="checkbox" /> 草稿</label>
+            <label><input id="post-pinned" type="checkbox" /> 置顶</label>
+            <label><input id="post-comment" type="checkbox" /> 评论</label>
+          </div>
+        </section>
+
+        <div class="writing-layout">
+          <section class="editor-pane">
+            <textarea id="post-body" spellcheck="false" placeholder="开始写正文..."></textarea>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <script is:inline>
+      // @ts-nocheck
+      const API_BASE = "http://127.0.0.1:8789";
+      const params = new URLSearchParams(window.location.search);
+      const state = { posts: [], currentPath: "", dirty: false };
+      const $ = (id) => document.getElementById(id);
+      const fieldMap = {
+        title: "post-title",
+        published: "post-published",
+        updated: "post-updated",
+        description: "post-description",
+        image: "post-image",
+        tags: "post-tags",
+        category: "post-category",
+        draft: "post-draft",
+        lang: "post-lang",
+        pinned: "post-pinned",
+        author: "post-author",
+        sourceLink: "post-sourceLink",
+        licenseName: "post-licenseName",
+        licenseUrl: "post-licenseUrl",
+        comment: "post-comment",
+        password: "post-password",
+        passwordHint: "post-passwordHint",
+      };
+
+      function setStatus(message, type = "") {
+        $("editor-status").textContent = message;
+        $("editor-status").dataset.type = type;
+      }
+
+      function today() {
+        return new Date().toISOString().slice(0, 10);
+      }
+
+      function slugify(text) {
+        return String(text || "new-post").trim().toLowerCase()
+          .replace(/['"]/g, "")
+          .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, "-")
+          .replace(/^-+|-+$/g, "") || "new-post";
+      }
+
+      async function api(path, options = {}) {
+        const response = await fetch(API_BASE + path, {
+          headers: { "content-type": "application/json" },
+          ...options,
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "请求失败");
+        return data;
+      }
+
+      async function loadPosts() {
+        const data = await api("/api/posts");
+        state.posts = data.posts;
+        renderPostList();
+        setStatus("已连接本地编辑服务", "ok");
+      }
+
+      function renderPostList() {
+        const query = $("editor-search").value.trim().toLowerCase();
+        const posts = state.posts.filter((post) =>
+          [post.title, post.path, post.category, post.tags.join(",")]
+            .join(" ").toLowerCase().includes(query)
+        );
+        const list = $("editor-post-list");
+        list.innerHTML = posts.length ? "" : '<div class="empty">没有找到文章</div>';
+        const groups = posts.reduce((map, post) => {
+          const key = post.category || "未分类";
+          if (!map.has(key)) map.set(key, []);
+          map.get(key).push(post);
+          return map;
+        }, new Map());
+        for (const [category, groupPosts] of groups) {
+          const group = document.createElement("section");
+          group.className = "post-group";
+          group.innerHTML = '<div class="post-group-title"><span class="chevron">⌄</span><span></span></div><div class="post-group-items"></div>';
+          group.querySelector(".post-group-title span:last-child").textContent = category;
+          const items = group.querySelector(".post-group-items");
+          for (const post of groupPosts) {
+          const item = document.createElement("button");
+          item.type = "button";
+          item.className = "post-item" + (post.path === state.currentPath ? " active" : "");
+            item.innerHTML = '<span class="post-title"></span><span class="post-state"></span><span class="post-meta"></span>';
+          item.querySelector(".post-title").textContent = post.title;
+            item.querySelector(".post-meta").textContent = post.path;
+          if (post.draft) item.querySelector(".post-state").textContent = "草稿";
+          item.addEventListener("click", () => loadPost(post.path));
+            items.appendChild(item);
+          }
+          list.appendChild(group);
+        }
+      }
+
+      async function loadPost(path) {
+        if (state.dirty && !confirm("当前文章还没保存，要切换吗？")) return;
+        const data = await api("/api/post?path=" + encodeURIComponent(path));
+        state.currentPath = data.path;
+        fillForm(data.path, data.frontmatter, data.body);
+        state.dirty = false;
+        setStatus("已载入 " + data.path, "ok");
+        renderPostList();
+      }
+
+      function fillForm(path, frontmatter = {}, body = "") {
+        $("post-path").value = path || "";
+        Object.entries(fieldMap).forEach(([key, id]) => {
+          const input = $(id);
+          const value = frontmatter[key];
+          if (input.type === "checkbox") input.checked = Boolean(value);
+          else if (key === "tags") input.value = Array.isArray(value) ? value.join(", ") : value || "";
+          else input.value = value || "";
+        });
+        $("post-body").value = body || "";
+        resizeBodyEditor();
+      }
+
+      function readForm() {
+        return {
+          path: $("post-path").value.trim(),
+          oldPath: state.currentPath,
+          frontmatter: {
+            title: $("post-title").value.trim(),
+            published: $("post-published").value,
+            updated: $("post-updated").value,
+            description: $("post-description").value,
+            image: $("post-image").value,
+            tags: $("post-tags").value,
+            category: $("post-category").value,
+            draft: $("post-draft").checked,
+            lang: $("post-lang").value,
+            pinned: $("post-pinned").checked,
+            author: $("post-author").value,
+            sourceLink: $("post-sourceLink").value,
+            licenseName: $("post-licenseName").value,
+            licenseUrl: $("post-licenseUrl").value,
+            comment: $("post-comment").checked,
+            password: $("post-password").value,
+            passwordHint: $("post-passwordHint").value,
+          },
+          body: $("post-body").value,
+        };
+      }
+
+      async function savePost() {
+        const payload = readForm();
+        if (!payload.frontmatter.title) return alert("标题不能为空。");
+        if (!payload.path) {
+          payload.path = slugify(payload.frontmatter.title) + ".md";
+          $("post-path").value = payload.path;
+        }
+        const data = await api("/api/post", { method: "POST", body: JSON.stringify(payload) });
+        state.currentPath = data.path;
+        state.dirty = false;
+        setStatus("已保存 " + data.path, "ok");
+        await loadPosts();
+      }
+
+      function newPost() {
+        if (state.dirty && !confirm("当前文章还没保存，要新建吗？")) return;
+        state.currentPath = "";
+        fillForm("", {
+          title: "",
+          published: today(),
+          updated: "",
+          tags: [],
+          draft: true,
+          lang: "zh-CN",
+          pinned: false,
+          comment: true,
+        }, "# 新文章\n\n");
+        state.dirty = false;
+        setStatus("正在创建新文章");
+        renderPostList();
+        $("post-title").focus();
+      }
+
+      function markDirty() {
+        state.dirty = true;
+        setStatus("有未保存修改");
+      }
+
+      function resizeBodyEditor() {
+        $("post-body").style.setProperty("--writing-space", Math.max(window.innerHeight * 0.45, 360) + "px");
+      }
+
+      $("post-body").addEventListener("focus", resizeBodyEditor);
+      document.querySelector(".editor-pane")?.addEventListener("click", () => {
+        const body = $("post-body");
+        body.focus();
+        body.selectionStart = body.selectionEnd = body.value.length;
+      });
+      document.querySelector(".editor-pane")?.addEventListener("wheel", (event) => {
+        const body = $("post-body");
+        if (event.target === body) return;
+        body.scrollTop += event.deltaY;
+        event.preventDefault();
+      }, { passive: false });
+      window.addEventListener("resize", resizeBodyEditor);
+
+      Object.values(fieldMap).concat(["post-path", "post-body"]).forEach((id) => {
+        $(id)?.addEventListener("input", () => {
+          markDirty();
+          if (id === "post-body") resizeBodyEditor();
+        });
+      });
+      $("editor-search").addEventListener("input", renderPostList);
+      $("editor-refresh").addEventListener("click", () => loadPosts().catch((error) => setStatus(error.message, "error")));
+      $("editor-new").addEventListener("click", newPost);
+      $("rail-new").addEventListener("click", newPost);
+      $("editor-save").addEventListener("click", () => savePost().catch((error) => alert(error.message)));
+      $("meta-toggle").addEventListener("click", (event) => {
+        event.stopPropagation();
+        $("meta-panel").classList.toggle("collapsed");
+      });
+      $("meta-panel").addEventListener("click", (event) => event.stopPropagation());
+      document.addEventListener("click", () => $("meta-panel").classList.add("collapsed"));
+
+      window.addEventListener("beforeunload", (event) => {
+        if (!state.dirty) return;
+        event.preventDefault();
+        event.returnValue = "";
+      });
+
+      loadPosts()
+        .then(() => {
+          const requested = params.get("path");
+          if (requested) return loadPost(requested);
+          if (state.posts[0]) return loadPost(state.posts[0].path);
+          return newPost();
+        })
+        .catch(() => setStatus("没有连上本地编辑服务。请先运行 pnpm editor，然后刷新本页。", "error"));
+    </script>
+  </body>
+</html>
+
+<style>
+  :root {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #202124;
+    background: #fff;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+  }
+
+  button,
+  input,
+  textarea {
+    font: inherit;
+  }
+
+  .yuque-editor {
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 56px 280px minmax(0, 1fr);
+    background: #fff;
+    overflow: hidden;
+  }
+
+  .rail {
+    border-right: 1px solid #edf0f2;
+    background: #fbfcfd;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 8px;
+  }
+
+  .rail-logo,
+  .rail-btn,
+  .round-btn,
+  .tool-btn,
+  .save-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    cursor: pointer;
+  }
+
+  .rail-logo,
+  .rail-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    color: #42464d;
+    background: transparent;
+  }
+
+  .rail-logo {
+    background: #15bf74;
+    color: #fff;
+  }
+
+  .rail-btn.active,
+  .rail-btn:hover {
+    background: #eef3f1;
+    color: #15bf74;
+  }
+
+  .library {
+    border-right: 1px solid #edf0f2;
+    background: #fff;
+    min-width: 0;
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr);
+  }
+
+  .library-head {
+    height: 72px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #f0f2f4;
+  }
+
+  .workspace {
+    font-size: 12px;
+    color: #8a8f99;
+  }
+
+  .library h1 {
+    margin: 2px 0 0;
+    font-size: 18px;
+  }
+
+  .round-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    color: #fff;
+    background: #12b76a;
+  }
+
+  .search {
+    margin: 14px 14px 8px;
+    height: 38px;
+    border-radius: 10px;
+    background: #f4f6f8;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+    color: #8a8f99;
+  }
+
+  .search input {
+    min-width: 0;
+    width: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+  }
+
+  :global(.post-list) {
+    overflow: auto;
+    padding: 8px 10px 18px;
+  }
+
+  :global(.post-group) {
+    margin: 2px 0 8px;
+  }
+
+  :global(.post-group-title) {
+    height: 34px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 8px;
+    color: #3f434a;
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  :global(.chevron) {
+    width: 16px;
+    color: #7b8088;
+    font-size: 15px;
+    line-height: 1;
+  }
+
+  :global(.post-group-items) {
+    display: grid;
+    gap: 2px;
+  }
+
+  :global(.post-item) {
+    appearance: none;
+    width: 100%;
+    border: 0;
+    background: transparent;
+    border-radius: 7px;
+    padding: 8px 10px 8px 32px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 2px 8px;
+    text-align: left;
+    cursor: pointer;
+    color: #333840;
+    font: inherit;
+  }
+
+  :global(.post-item:hover) {
+    background: #f6f7f8;
+  }
+
+  :global(.post-item.active) {
+    background: #eeeeef;
+  }
+
+  :global(.post-title) {
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 1.45;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  :global(.post-state) {
+    color: #12b76a;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  :global(.post-meta) {
+    grid-column: 1 / -1;
+    color: #8a8f99;
+    font-size: 12px;
+    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .workspace-main {
+    min-width: 0;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    position: relative;
+  }
+
+  .topbar {
+    height: 72px;
+    border-bottom: 1px solid #edf0f2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 0 24px;
+  }
+
+  .doc-info {
+    min-width: 0;
+  }
+
+  .title-input {
+    width: min(520px, 58vw);
+    border: 0;
+    outline: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #202124;
+    background: transparent;
+  }
+
+  .doc-status {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #8a8f99;
+  }
+
+  .doc-status[data-type="ok"] {
+    color: #12b76a;
+  }
+
+  .doc-status[data-type="error"] {
+    color: #d14343;
+  }
+
+  .toolbar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .tool-btn,
+  .save-btn {
+    height: 38px;
+    gap: 6px;
+    border-radius: 10px;
+    padding: 0 12px;
+    background: #fff;
+    color: #333840;
+    border: 1px solid #e5e7eb;
+  }
+
+  .tool-btn:hover {
+    background: #f7f8fa;
+  }
+
+  .save-btn {
+    border-color: #12b76a;
+    background: #12b76a;
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .meta-panel {
+    position: absolute;
+    top: 62px;
+    right: 24px;
+    z-index: 30;
+    width: min(760px, calc(100vw - 390px));
+    max-height: calc(100vh - 88px);
+    overflow: auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 18px 48px rgba(31, 35, 41, 0.14);
+  }
+
+  .meta-panel.collapsed {
+    display: none;
+  }
+
+  .meta-panel label {
+    display: grid;
+    gap: 5px;
+    color: #777d87;
+    font-size: 12px;
+  }
+
+  .meta-panel input {
+    height: 34px;
+    border: 1px solid #e3e6ea;
+    border-radius: 8px;
+    padding: 0 10px;
+    outline: 0;
+  }
+
+  .meta-panel input:focus {
+    border-color: #12b76a;
+  }
+
+  .span-2 {
+    grid-column: span 2;
+  }
+
+  .span-4 {
+    grid-column: span 2;
+  }
+
+  .toggles {
+    display: flex;
+    gap: 14px;
+    align-items: end;
+  }
+
+  .toggles label {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #333840;
+  }
+
+  .writing-layout {
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    overflow: hidden;
+  }
+
+  .editor-pane {
+    min-width: 0;
+    min-height: 0;
+    background: #fff;
+    cursor: text;
+    overflow: hidden;
+  }
+
+  #post-body {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    margin: 0;
+    padding: 56px 72px var(--writing-space, 45vh);
+    border: 0;
+    outline: 0;
+    resize: none;
+    overflow-y: auto;
+    cursor: text;
+    color: #202124;
+    font-size: 19px;
+    line-height: 1.9;
+    font-family: "JetBrains Mono", Consolas, "Microsoft YaHei", monospace;
+  }
+
+  @media (max-width: 980px) {
+    #post-body {
+      padding: 40px 28px 96px;
+    }
+  }
+
+  .empty {
+    color: #9aa0a6;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .empty.left {
+    text-align: left;
+    padding: 0;
+  }
+
+  @media (max-width: 980px) {
+    .yuque-editor {
+      grid-template-columns: 56px minmax(0, 1fr);
+    }
+
+    .library {
+      display: none;
+    }
+
+    .writing-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .meta-panel {
+      left: 72px;
+      right: 16px;
+      width: auto;
+      grid-template-columns: 1fr;
+    }
+
+    .span-2,
+    .span-4 {
+      grid-column: span 1;
+    }
+  }
+</style>

@@ -9,6 +9,7 @@
     "build": "node scripts/generate-icons.js && npx tsx scripts/generate-lqips.ts && astro build && pagefind --site dist",
     "preview": "astro preview",
     "astro": "astro",
+    "editor": "node scripts/editor-server.js",
     "type-check": "tsc --noEmit --isolatedDeclarations",
     "new-post": "node scripts/new-post.js",
     "format": "biome format --write ./src",
