@@ -56,6 +56,9 @@ export default defineConfig({
 
 	base: "/",
 	trailingSlash: "always",
+	server: {
+		port: 4321,
+	},
 
 	adapter,
 
@@ -302,4 +305,3 @@ export default defineConfig({
 		},
 	},
 });
-

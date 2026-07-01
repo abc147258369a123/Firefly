@@ -45,6 +45,10 @@ import { siteConfig } from "@/config";
         <header class="topbar">
           <div class="doc-info">
             <input id="post-title" class="title-input" placeholder="未命名文章" />
+            <label class="description-field">
+              <span>摘要</span>
+              <input id="post-description" class="description-input" placeholder="显示在首页文章卡片里的内容" />
+            </label>
             <div class="doc-status" id="editor-status">正在连接本地编辑服务...</div>
           </div>
           <div class="toolbar">
@@ -55,12 +59,133 @@ import { siteConfig } from "@/config";
               <Icon name="material-symbols:tune-rounded" />
               信息
             </button>
+            <button id="editor-publish" class="tool-btn" type="button">
+              <Icon name="material-symbols:upload-rounded" />
+              上传
+            </button>
             <button id="editor-save" class="save-btn" type="button">
               <Icon name="material-symbols:save-outline-rounded" />
               保存
             </button>
           </div>
         </header>
+
+        <div class="formatbar" aria-label="Markdown 编辑工具栏">
+          <button class="format-btn green" type="button" data-format="heading" title="标题">+</button>
+          <span class="format-sep"></span>
+          <button class="format-btn" type="button" data-format="undo" title="撤销">↶</button>
+          <button class="format-btn" type="button" data-format="redo" title="重做">↷</button>
+          <div class="block-format" id="block-format">
+            <button class="block-format-trigger" id="block-format-trigger" type="button" title="正文与标题" aria-haspopup="true" aria-expanded="false">
+              <span id="block-format-label">正文</span>
+              <Icon name="material-symbols:arrow-drop-down-rounded" />
+            </button>
+            <div class="block-format-menu collapsed" id="block-format-menu" role="menu">
+              <button class="block-format-item active" type="button" data-block="div" role="menuitem">
+                <span class="check">✓</span>
+                <span class="sample normal">正文</span>
+              </button>
+              <button class="block-format-item" type="button" data-block="h1" role="menuitem">
+                <span class="check">✓</span>
+                <span class="sample h1">标题1</span>
+              </button>
+              <button class="block-format-item" type="button" data-block="h2" role="menuitem">
+                <span class="check">✓</span>
+                <span class="sample h2">标题2</span>
+              </button>
+              <button class="block-format-item" type="button" data-block="h3" role="menuitem">
+                <span class="check">✓</span>
+                <span class="sample h3">标题3</span>
+              </button>
+              <button class="block-format-item" type="button" data-block="h4" role="menuitem">
+                <span class="check">✓</span>
+                <span class="sample h4">标题4</span>
+              </button>
+              <button class="block-format-item" type="button" data-block="h5" role="menuitem">
+                <span class="check">✓</span>
+                <span class="sample h5">标题5</span>
+              </button>
+              <button class="block-format-item" type="button" data-block="h6" role="menuitem">
+                <span class="check">✓</span>
+                <span class="sample h6">标题6</span>
+              </button>
+            </div>
+          </div>
+          <div class="font-size-picker" id="font-size-picker">
+            <button class="font-size-trigger" id="font-size-trigger" type="button" title="字号" aria-haspopup="true" aria-expanded="false">
+              <span id="font-size-label">15px</span>
+              <Icon name="material-symbols:arrow-drop-down-rounded" />
+            </button>
+            <div class="font-size-menu collapsed" id="font-size-menu" role="menu">
+              <button class="font-size-item" type="button" data-size="12px" role="menuitem">
+                <span class="check">✓</span>
+                <span class="value">12px</span>
+              </button>
+              <button class="font-size-item" type="button" data-size="13px" role="menuitem">
+                <span class="check">✓</span>
+                <span class="value">13px</span>
+              </button>
+              <button class="font-size-item" type="button" data-size="14px" role="menuitem">
+                <span class="check">✓</span>
+                <span class="value">14px</span>
+              </button>
+              <button class="font-size-item active" type="button" data-size="15px" role="menuitem">
+                <span class="check">✓</span>
+                <span class="value">15px</span>
+              </button>
+              <button class="font-size-item" type="button" data-size="16px" role="menuitem">
+                <span class="check">✓</span>
+                <span class="value">16px</span>
+              </button>
+              <button class="font-size-item" type="button" data-size="19px" role="menuitem">
+                <span class="check">✓</span>
+                <span class="value">19px</span>
+              </button>
+              <button class="font-size-item" type="button" data-size="22px" role="menuitem">
+                <span class="check">✓</span>
+                <span class="value">22px</span>
+              </button>
+              <button class="font-size-item" type="button" data-size="24px" role="menuitem">
+                <span class="check">✓</span>
+                <span class="value">24px</span>
+              </button>
+              <button class="font-size-item" type="button" data-size="29px" role="menuitem">
+                <span class="check">✓</span>
+                <span class="value">29px</span>
+              </button>
+              <button class="font-size-item" type="button" data-size="32px" role="menuitem">
+                <span class="check">✓</span>
+                <span class="value">32px</span>
+              </button>
+              <button class="font-size-item" type="button" data-size="40px" role="menuitem">
+                <span class="check">✓</span>
+                <span class="value">40px</span>
+              </button>
+              <button class="font-size-item" type="button" data-size="48px" role="menuitem">
+                <span class="check">✓</span>
+                <span class="value">48px</span>
+              </button>
+            </div>
+          </div>
+          <span class="format-sep"></span>
+          <button class="format-btn strong" type="button" data-format="bold" title="加粗">B</button>
+          <button class="format-btn italic" type="button" data-format="italic" title="斜体">I</button>
+          <button class="format-btn strike" type="button" data-format="strike" title="删除线">S</button>
+          <button class="format-btn" type="button" data-format="inlineCode" title="行内代码">&lt;/&gt;</button>
+          <button class="format-btn" id="format-painter" type="button" title="格式刷">
+            <Icon name="material-symbols:format-paint-outline-rounded" />
+          </button>
+          <span class="format-sep"></span>
+          <button class="format-btn" type="button" data-format="quote" title="引用">❝</button>
+          <button class="format-btn" type="button" data-format="ul" title="无序列表">•</button>
+          <button class="format-btn" type="button" data-format="ol" title="有序列表">1.</button>
+          <button class="format-btn" type="button" data-format="task" title="任务列表">☑</button>
+          <span class="format-sep"></span>
+          <button class="format-btn" type="button" data-format="link" title="链接">🔗</button>
+          <button class="format-btn" type="button" data-format="image" title="图片">▧</button>
+          <button class="format-btn" type="button" data-format="codeBlock" title="代码块">⌗</button>
+          <button class="format-btn" type="button" data-format="hr" title="分割线">—</button>
+        </div>
 
         <section class="meta-panel collapsed" id="meta-panel">
           <label class="span-2">文章路径
@@ -83,9 +208,6 @@ import { siteConfig } from "@/config";
           </label>
           <label class="span-2">封面图
             <input id="post-image" placeholder="./cover.avif 或 /assets/..." />
-          </label>
-          <label class="span-4">摘要
-            <input id="post-description" placeholder="这句话会显示在博客首页和文章列表里" />
           </label>
           <label>作者
             <input id="post-author" />
@@ -114,7 +236,7 @@ import { siteConfig } from "@/config";
 
         <div class="writing-layout">
           <section class="editor-pane">
-            <textarea id="post-body" spellcheck="false" placeholder="开始写正文..."></textarea>
+            <div id="post-body" class="visual-editor" contenteditable="true" spellcheck="false" data-placeholder="开始写正文..."></div>
           </section>
         </div>
       </main>
@@ -125,6 +247,9 @@ import { siteConfig } from "@/config";
       const API_BASE = "http://127.0.0.1:8789";
       const params = new URLSearchParams(window.location.search);
       const state = { posts: [], currentPath: "", dirty: false };
+      const painterState = { copied: null };
+      const blockFormatLabels = { div: "正文", h1: "标题1", h2: "标题2", h3: "标题3", h4: "标题4", h5: "标题5", h6: "标题6" };
+      const fontSizeOptions = ["12px", "13px", "14px", "15px", "16px", "19px", "22px", "24px", "29px", "32px", "40px", "48px"];
       const $ = (id) => document.getElementById(id);
       const fieldMap = {
         title: "post-title",
@@ -196,8 +321,8 @@ import { siteConfig } from "@/config";
         for (const [category, groupPosts] of groups) {
           const group = document.createElement("section");
           group.className = "post-group";
-          group.innerHTML = '<div class="post-group-title"><span class="chevron">⌄</span><span></span></div><div class="post-group-items"></div>';
-          group.querySelector(".post-group-title span:last-child").textContent = category;
+          group.innerHTML = '<div class="post-group-title"><span></span></div><div class="post-group-items"></div>';
+          group.querySelector(".post-group-title span").textContent = category;
           const items = group.querySelector(".post-group-items");
           for (const post of groupPosts) {
           const item = document.createElement("button");
@@ -233,7 +358,7 @@ import { siteConfig } from "@/config";
           else if (key === "tags") input.value = Array.isArray(value) ? value.join(", ") : value || "";
           else input.value = value || "";
         });
-        $("post-body").value = body || "";
+        setEditorMarkdown(body || "");
         resizeBodyEditor();
       }
 
@@ -260,7 +385,7 @@ import { siteConfig } from "@/config";
             password: $("post-password").value,
             passwordHint: $("post-passwordHint").value,
           },
-          body: $("post-body").value,
+          body: getEditorMarkdown(),
         };
       }
 
@@ -276,6 +401,22 @@ import { siteConfig } from "@/config";
         state.dirty = false;
         setStatus("已保存 " + data.path, "ok");
         await loadPosts();
+      }
+
+      async function publishPost() {
+        if (state.dirty) await savePost();
+        if (!state.currentPath) {
+          throw new Error("先保存当前文章，再上传。");
+        }
+        setStatus("正在上传到 GitHub...");
+        const result = await api("/api/publish", {
+          method: "POST",
+          body: JSON.stringify({
+            path: state.currentPath,
+            title: $("post-title").value.trim(),
+          }),
+        });
+        setStatus("已推送到 GitHub，正在等待 Cloudflare 部署，通常需要 1-5 分钟", "ok");
       }
 
       function newPost() {
@@ -303,40 +444,477 @@ import { siteConfig } from "@/config";
       }
 
       function resizeBodyEditor() {
-        $("post-body").style.setProperty("--writing-space", Math.max(window.innerHeight * 0.45, 360) + "px");
+        $("post-body").style.setProperty("--writing-space", Math.max(window.innerHeight * 0.9, 640) + "px");
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;");
+      }
+
+      function inlineMarkdownToHtml(value) {
+        return escapeHtml(value)
+          .replace(/&lt;br\s*\/?&gt;/gi, "<br>")
+          .replace(/&lt;span\s+style="font-size:\s*([^"]+)"\s*&gt;(.*?)&lt;\/span&gt;/gi, (_, size, text) => `<span style="font-size:${size}">${text}</span>`)
+          .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+          .replace(/~~([^~]+)~~/g, "<s>$1</s>")
+          .replace(/`([^`]+)`/g, "<code>$1</code>")
+          .replace(/\*([^*]+)\*/g, "<em>$1</em>")
+          .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+      }
+
+      function stripLeadingEditorBreaks(value) {
+        return String(value || "").replace(/^(?:[ \t]*<br\s*\/?>[ \t]*(?:\r?\n)?|[ \t]*\r?\n)+/i, "");
+      }
+
+      function setEditorMarkdown(markdown) {
+        const html = stripLeadingEditorBreaks(markdown)
+          .split(/\r?\n/)
+          .map((line) => {
+            if (line.startsWith("###### ")) return `<h6>${inlineMarkdownToHtml(line.slice(7))}</h6>`;
+            if (line.startsWith("##### ")) return `<h5>${inlineMarkdownToHtml(line.slice(6))}</h5>`;
+            if (line.startsWith("#### ")) return `<h4>${inlineMarkdownToHtml(line.slice(5))}</h4>`;
+            if (line.startsWith("### ")) return `<h3>${inlineMarkdownToHtml(line.slice(4))}</h3>`;
+            if (line.startsWith("## ")) return `<h2>${inlineMarkdownToHtml(line.slice(3))}</h2>`;
+            if (line.startsWith("# ")) return `<h1>${inlineMarkdownToHtml(line.slice(2))}</h1>`;
+            if (line.startsWith("> ")) return `<blockquote>${inlineMarkdownToHtml(line.slice(2))}</blockquote>`;
+            if (line.startsWith("- [ ] ")) return `<div class="task-line">☐ ${inlineMarkdownToHtml(line.slice(6))}</div>`;
+            if (line.startsWith("- ")) return `<div>• ${inlineMarkdownToHtml(line.slice(2))}</div>`;
+            if (/^\d+\.\s/.test(line)) return `<div>${inlineMarkdownToHtml(line)}</div>`;
+            if (line.trim() === "---") return "<hr>";
+            if (!line.trim()) return "<div><br></div>";
+            return `<div>${inlineMarkdownToHtml(line)}</div>`;
+          })
+          .join("");
+        $("post-body").innerHTML = html || "<div><br></div>";
+      }
+
+      function nodeToMarkdown(node) {
+        if (node.nodeType === Node.TEXT_NODE) return node.textContent || "";
+        if (node.nodeType !== Node.ELEMENT_NODE) return "";
+        const tag = node.tagName.toLowerCase();
+        const children = Array.from(node.childNodes).map(nodeToMarkdown).join("");
+        if (tag === "span" && node.style.fontSize) return `<span style="font-size:${node.style.fontSize}">${children}</span>`;
+        if (tag === "strong" || tag === "b") return `**${children}**`;
+        if (tag === "em" || tag === "i") return `*${children}*`;
+        if (tag === "s" || tag === "strike") return `~~${children}~~`;
+        if (tag === "code") return `\`${children}\``;
+        if (tag === "a") return `[${children}](${node.getAttribute("href") || ""})`;
+        if (tag === "h1") return `# ${children}\n`;
+        if (tag === "h2") return `## ${children}\n`;
+        if (tag === "h3") return `### ${children}\n`;
+        if (tag === "h4") return `#### ${children}\n`;
+        if (tag === "h5") return `##### ${children}\n`;
+        if (tag === "h6") return `###### ${children}\n`;
+        if (tag === "blockquote") return `> ${children}\n`;
+        if (tag === "ul") return `${Array.from(node.children).map((item) => `- ${item.textContent || ""}`).join("\n")}\n`;
+        if (tag === "ol") return `${Array.from(node.children).map((item, index) => `${index + 1}. ${item.textContent || ""}`).join("\n")}\n`;
+        if (tag === "li") return children;
+        if (tag === "hr") return "---\n";
+        if (tag === "br") return "<br>";
+        if (tag === "div" || tag === "p") return `${children}\n`;
+        return children;
+      }
+
+      function getEditorMarkdown() {
+        const parts = [];
+        let lineBuffer = [];
+
+        const flushLineBuffer = () => {
+          if (!lineBuffer.length) return;
+          parts.push(lineBuffer.join("<br>"));
+          lineBuffer = [];
+        };
+
+        Array.from($("post-body").childNodes).forEach((node) => {
+          if (node.nodeType === Node.TEXT_NODE) {
+            const text = (node.textContent || "").trim();
+            if (text) lineBuffer.push(text);
+            return;
+          }
+
+          if (node.nodeType !== Node.ELEMENT_NODE) return;
+          const tag = node.tagName.toLowerCase();
+          const value = nodeToMarkdown(node).trimEnd();
+
+          if (tag === "div" || tag === "p") {
+            if (!value.trim()) {
+              flushLineBuffer();
+              parts.push("");
+              return;
+            }
+            lineBuffer.push(value);
+            return;
+          }
+
+          flushLineBuffer();
+          if (value) parts.push(value);
+        });
+
+        flushLineBuffer();
+
+        return parts
+          .join("\n\n")
+          .replace(/^(?:[ \t]*<br\s*\/?>[ \t]*(?:\r?\n)?|[ \t]*\r?\n)+/i, "")
+          .replace(/\n{3,}/g, "\n\n")
+          .trimEnd();
+      }
+
+      function focusEditor() {
+        $("post-body").focus();
+      }
+
+      function getSelectionElement() {
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0) return null;
+        const node = selection.anchorNode;
+        const element = node?.nodeType === Node.ELEMENT_NODE ? node : node?.parentElement;
+        return $("post-body").contains(element) ? element : null;
+      }
+
+      function getSelectionRange() {
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0) return null;
+        const range = selection.getRangeAt(0);
+        const container = range.commonAncestorContainer?.nodeType === Node.ELEMENT_NODE
+          ? range.commonAncestorContainer
+          : range.commonAncestorContainer?.parentElement;
+        return $("post-body").contains(container) ? range : null;
+      }
+
+      function closestEditorTag(element, tags) {
+        let current = element;
+        while (current && current !== $("post-body")) {
+          const tag = current.tagName?.toLowerCase();
+          if (tags.includes(tag)) return tag;
+          current = current.parentElement;
+        }
+        return "";
+      }
+
+      function normalizeBlockTag(tagName) {
+        return blockFormatLabels[tagName] ? tagName : "div";
+      }
+
+      function getCurrentSelectionElement() {
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0) return getSelectionElement();
+        const range = selection.getRangeAt(0);
+        const container = elementFromNode(range.commonAncestorContainer);
+        if (!$("post-body").contains(container)) return null;
+        return range.collapsed ? elementFromNode(selection.focusNode || selection.anchorNode) : getFirstSelectedTextElement(range);
+      }
+
+      function readCurrentFormat() {
+        const element = getCurrentSelectionElement();
+        if (!element) return null;
+        return {
+          block: normalizeBlockTag(closestEditorTag(element, ["h1", "h2", "h3", "h4", "h5", "h6"]) || "div"),
+          bold: document.queryCommandState("bold") || Boolean(element.closest("strong,b")),
+          italic: document.queryCommandState("italic") || Boolean(element.closest("em,i")),
+          strike: document.queryCommandState("strikeThrough") || Boolean(element.closest("s,strike")),
+          code: Boolean(element.closest("code")),
+          fontSize: getCurrentFontSize(element),
+        };
+      }
+
+      function normalizeFontSizeValue(value) {
+        const numeric = Number.parseFloat(String(value || ""));
+        return Number.isFinite(numeric) ? `${Math.round(numeric)}px` : "19px";
+      }
+
+      function elementFromNode(node) {
+        if (!node) return null;
+        return node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement;
+      }
+
+      function getFirstSelectedTextElement(range) {
+        const root = $("post-body");
+        const startElement = elementFromNode(range.startContainer);
+        if (startElement && startElement !== root && root.contains(startElement)) return startElement;
+
+        const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+          acceptNode(node) {
+            if (!node.textContent?.trim()) return NodeFilter.FILTER_REJECT;
+            return range.intersectsNode(node) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+          },
+        });
+        return elementFromNode(walker.nextNode());
+      }
+
+      function getCurrentFontSize(element = null) {
+        const target = element || getCurrentSelectionElement();
+        if (!target || !$("post-body").contains(target)) return normalizeFontSizeValue(window.getComputedStyle($("post-body")).fontSize);
+        const sized = target.closest("span[style*='font-size']");
+        if (sized?.style?.fontSize) return normalizeFontSizeValue(sized.style.fontSize);
+        return normalizeFontSizeValue(window.getComputedStyle(target).fontSize);
+      }
+
+      function setActiveFontSize(size) {
+        const value = normalizeFontSizeValue(size);
+        $("font-size-label").textContent = value;
+        document.querySelectorAll("[data-size]").forEach((item) => {
+          item.classList.toggle("active", item.dataset.size === value);
+        });
+      }
+
+      function syncCurrentToolbarFormat() {
+        if (!document.activeElement || !$("post-body").contains(document.activeElement) && document.activeElement !== $("post-body")) {
+          const selection = window.getSelection();
+          const node = selection?.anchorNode;
+          const element = elementFromNode(node);
+          if (!element || !$("post-body").contains(element)) return;
+        }
+        setActiveFontSize(getCurrentFontSize());
+        const currentFormat = readCurrentFormat();
+        if (currentFormat) setActiveBlockFormat(currentFormat.block);
+      }
+
+      function setPainterActive(active) {
+        $("format-painter").classList.toggle("active", active);
+      }
+
+      function copyCurrentFormat() {
+        const copied = readCurrentFormat();
+        if (!copied) {
+          setStatus("先把光标放到正文里，再点格式刷", "error");
+          return;
+        }
+        painterState.copied = copied;
+        setPainterActive(true);
+        setStatus("已取格式，选中文字后再点格式刷应用", "ok");
+      }
+
+      function unwrapFontSizeWithin(fragment) {
+        fragment.querySelectorAll?.("span[style*='font-size']").forEach((node) => {
+          const parent = node.parentNode;
+          while (node.firstChild) parent.insertBefore(node.firstChild, node);
+          parent.removeChild(node);
+        });
+      }
+
+      function wrapSelection(tagName) {
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return false;
+        const range = selection.getRangeAt(0);
+        const wrapper = document.createElement(tagName);
+        try {
+          range.surroundContents(wrapper);
+        } catch {
+          wrapper.appendChild(range.extractContents());
+          range.insertNode(wrapper);
+        }
+        selection.removeAllRanges();
+        const newRange = document.createRange();
+        newRange.selectNodeContents(wrapper);
+        selection.addRange(newRange);
+        return true;
+      }
+
+      function applyFontSize(size) {
+        const range = getSelectionRange();
+        if (!range) {
+          setStatus("先选中文字，再调整字号", "error");
+          return;
+        }
+        const selection = window.getSelection();
+        if (range.collapsed) {
+          setStatus("先选中文字，再调整字号", "error");
+          return;
+        }
+        const wrapper = document.createElement("span");
+        wrapper.style.fontSize = size;
+        const fragment = range.extractContents();
+        unwrapFontSizeWithin(fragment);
+        wrapper.appendChild(fragment);
+        range.insertNode(wrapper);
+        selection.removeAllRanges();
+        const newRange = document.createRange();
+        newRange.selectNodeContents(wrapper);
+        selection.addRange(newRange);
+        setActiveFontSize(size);
+        markDirty();
+      }
+
+      function applyCopiedFormat() {
+        const copied = painterState.copied;
+        if (!copied) return copyCurrentFormat();
+        focusEditor();
+        document.execCommand("formatBlock", false, copied.block === "blockquote" ? "blockquote" : copied.block);
+        if (copied.bold && !document.queryCommandState("bold")) document.execCommand("bold");
+        if (copied.italic && !document.queryCommandState("italic")) document.execCommand("italic");
+        if (copied.strike && !document.queryCommandState("strikeThrough")) document.execCommand("strikeThrough");
+        if (copied.code) wrapSelection("code");
+        if (copied.fontSize) applyFontSize(copied.fontSize);
+        painterState.copied = null;
+        setPainterActive(false);
+        markDirty();
+      }
+
+      function insertHtml(html) {
+        focusEditor();
+        document.execCommand("insertHTML", false, html);
+        markDirty();
+      }
+
+      function applyFormat(format) {
+        if (format === "undo") return document.execCommand("undo");
+        if (format === "redo") return document.execCommand("redo");
+        focusEditor();
+        if (format === "heading" || format === "heading2") return document.execCommand("formatBlock", false, format === "heading" ? "h1" : "h2");
+        if (format === "bold") return document.execCommand("bold");
+        if (format === "italic") return document.execCommand("italic");
+        if (format === "strike") return document.execCommand("strikeThrough");
+        if (format === "inlineCode") return insertHtml("<code>code</code>");
+        if (format === "quote") return document.execCommand("formatBlock", false, "blockquote");
+        if (format === "ul") return document.execCommand("insertUnorderedList");
+        if (format === "ol") return document.execCommand("insertOrderedList");
+        if (format === "task") return insertHtml('<div class="task-line">☐ 任务</div>');
+        if (format === "link") {
+          const href = prompt("链接地址", "https://");
+          if (href) document.execCommand("createLink", false, href);
+          return;
+        }
+        if (format === "image") return insertHtml("![图片描述](./image.png)");
+        if (format === "codeBlock") return insertHtml("<pre><code>console.log('hello');</code></pre>");
+        if (format === "hr") return insertHtml("<hr>");
+      }
+
+      function applyBlockFormat(tagName) {
+        focusEditor();
+        document.execCommand("formatBlock", false, tagName === "div" ? "div" : tagName);
+        setActiveBlockFormat(tagName);
+        markDirty();
+      }
+
+      function setActiveBlockFormat(tagName) {
+        const value = blockFormatLabels[tagName] ? tagName : "div";
+        $("block-format-label").textContent = blockFormatLabels[value];
+        document.querySelectorAll("[data-block]").forEach((item) => {
+          item.classList.toggle("active", item.dataset.block === value);
+        });
+      }
+
+      function closeBlockFormatMenu() {
+        $("block-format-menu").classList.add("collapsed");
+        $("block-format-trigger").setAttribute("aria-expanded", "false");
+      }
+
+      function toggleBlockFormatMenu() {
+        const menu = $("block-format-menu");
+        const isClosed = menu.classList.contains("collapsed");
+        if (isClosed) {
+          const rect = $("block-format-trigger").getBoundingClientRect();
+          menu.style.left = `${rect.left}px`;
+          menu.style.top = `${rect.bottom + 8}px`;
+        }
+        menu.classList.toggle("collapsed", !isClosed);
+        $("block-format-trigger").setAttribute("aria-expanded", String(isClosed));
+      }
+
+      function closeFontSizeMenu() {
+        $("font-size-menu").classList.add("collapsed");
+        $("font-size-trigger").setAttribute("aria-expanded", "false");
+      }
+
+      function toggleFontSizeMenu() {
+        const menu = $("font-size-menu");
+        const isClosed = menu.classList.contains("collapsed");
+        if (isClosed) {
+          const rect = $("font-size-trigger").getBoundingClientRect();
+          menu.style.left = `${rect.left}px`;
+          menu.style.top = `${rect.bottom + 8}px`;
+          syncCurrentToolbarFormat();
+        }
+        menu.classList.toggle("collapsed", !isClosed);
+        $("font-size-trigger").setAttribute("aria-expanded", String(isClosed));
       }
 
       $("post-body").addEventListener("focus", resizeBodyEditor);
-      document.querySelector(".editor-pane")?.addEventListener("click", () => {
+      $("post-body").addEventListener("keyup", syncCurrentToolbarFormat);
+      $("post-body").addEventListener("mouseup", syncCurrentToolbarFormat);
+      $("post-body").addEventListener("input", syncCurrentToolbarFormat);
+      document.addEventListener("selectionchange", syncCurrentToolbarFormat);
+      document.querySelector(".editor-pane")?.addEventListener("click", (event) => {
+        if (event.target === $("post-body")) return;
         const body = $("post-body");
         body.focus();
-        body.selectionStart = body.selectionEnd = body.value.length;
       });
-      document.querySelector(".editor-pane")?.addEventListener("wheel", (event) => {
-        const body = $("post-body");
-        if (event.target === body) return;
-        body.scrollTop += event.deltaY;
-        event.preventDefault();
-      }, { passive: false });
       window.addEventListener("resize", resizeBodyEditor);
 
-      Object.values(fieldMap).concat(["post-path", "post-body"]).forEach((id) => {
+      Object.values(fieldMap).concat(["post-path"]).forEach((id) => {
         $(id)?.addEventListener("input", () => {
           markDirty();
-          if (id === "post-body") resizeBodyEditor();
         });
+      });
+      $("post-body").addEventListener("input", () => {
+        markDirty();
+        resizeBodyEditor();
       });
       $("editor-search").addEventListener("input", renderPostList);
       $("editor-refresh").addEventListener("click", () => loadPosts().catch((error) => setStatus(error.message, "error")));
       $("editor-new").addEventListener("click", newPost);
       $("rail-new").addEventListener("click", newPost);
       $("editor-save").addEventListener("click", () => savePost().catch((error) => alert(error.message)));
+      $("editor-publish").addEventListener("click", () => publishPost().catch((error) => alert(error.message)));
+      document.querySelectorAll("[data-format]").forEach((button) => {
+        button.addEventListener("mousedown", (event) => event.preventDefault());
+        button.addEventListener("click", () => applyFormat(button.dataset.format));
+      });
+      $("format-painter").addEventListener("mousedown", (event) => event.preventDefault());
+      $("format-painter").addEventListener("click", applyCopiedFormat);
+      $("font-size-trigger").addEventListener("mousedown", (event) => event.preventDefault());
+      $("font-size-trigger").addEventListener("click", (event) => {
+        event.stopPropagation();
+        toggleFontSizeMenu();
+      });
+      document.querySelectorAll("[data-size]").forEach((item) => {
+        item.addEventListener("mousedown", (event) => event.preventDefault());
+        item.addEventListener("click", (event) => {
+          event.stopPropagation();
+          applyFontSize(item.dataset.size);
+          closeFontSizeMenu();
+        });
+      });
+      $("block-format-trigger").addEventListener("mousedown", (event) => event.preventDefault());
+      $("block-format-trigger").addEventListener("click", (event) => {
+        event.stopPropagation();
+        toggleBlockFormatMenu();
+      });
+      document.querySelectorAll("[data-block]").forEach((item) => {
+        item.addEventListener("mousedown", (event) => event.preventDefault());
+        item.addEventListener("click", (event) => {
+          event.stopPropagation();
+          applyBlockFormat(item.dataset.block);
+          closeBlockFormatMenu();
+        });
+      });
       $("meta-toggle").addEventListener("click", (event) => {
         event.stopPropagation();
         $("meta-panel").classList.toggle("collapsed");
       });
       $("meta-panel").addEventListener("click", (event) => event.stopPropagation());
-      document.addEventListener("click", () => $("meta-panel").classList.add("collapsed"));
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeBlockFormatMenu();
+          closeFontSizeMenu();
+        }
+      });
+      window.addEventListener("resize", () => {
+        closeBlockFormatMenu();
+        closeFontSizeMenu();
+      });
+      document.querySelector(".formatbar")?.addEventListener("scroll", () => {
+        closeBlockFormatMenu();
+        closeFontSizeMenu();
+      });
+      document.addEventListener("click", () => {
+        closeBlockFormatMenu();
+        closeFontSizeMenu();
+        $("meta-panel").classList.add("collapsed");
+      });
 
       window.addEventListener("beforeunload", (event) => {
         if (!state.dirty) return;
@@ -502,13 +1080,6 @@ import { siteConfig } from "@/config";
     font-weight: 500;
   }
 
-  :global(.chevron) {
-    width: 16px;
-    color: #7b8088;
-    font-size: 15px;
-    line-height: 1;
-  }
-
   :global(.post-group-items) {
     display: grid;
     gap: 2px;
@@ -566,32 +1137,65 @@ import { siteConfig } from "@/config";
   .workspace-main {
     min-width: 0;
     display: grid;
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-rows: auto 42px minmax(0, 1fr);
     position: relative;
   }
 
   .topbar {
-    height: 72px;
+    min-height: 96px;
     border-bottom: 1px solid #edf0f2;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 16px;
-    padding: 0 24px;
+    padding: 16px 24px 12px;
   }
 
   .doc-info {
     min-width: 0;
+    flex: 1;
   }
 
   .title-input {
-    width: min(520px, 58vw);
+    width: 100%;
     border: 0;
     outline: 0;
-    font-size: 18px;
+    font-size: 22px;
     font-weight: 700;
     color: #202124;
     background: transparent;
+  }
+
+  .description-field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: min(680px, 100%);
+    margin-top: 6px;
+    color: #7b8088;
+    font-size: 13px;
+  }
+
+  .description-field span {
+    flex: 0 0 auto;
+    font-weight: 600;
+  }
+
+  .description-input {
+    display: block;
+    width: 100%;
+    height: 30px;
+    border: 0;
+    outline: 0;
+    border-radius: 8px;
+    background: #f6f7f8;
+    padding: 0 10px;
+    color: #59616d;
+    font-size: 14px;
+  }
+
+  .description-input::placeholder {
+    color: #b5bac1;
   }
 
   .doc-status {
@@ -612,6 +1216,7 @@ import { siteConfig } from "@/config";
     display: flex;
     gap: 10px;
     align-items: center;
+    padding-top: 4px;
   }
 
   .tool-btn,
@@ -634,6 +1239,278 @@ import { siteConfig } from "@/config";
     background: #12b76a;
     color: #fff;
     font-weight: 700;
+  }
+
+  .formatbar {
+    height: 42px;
+    border-bottom: 1px solid #edf0f2;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 14px;
+    background: #fff;
+    overflow-x: auto;
+  }
+
+  .format-btn {
+    min-width: 32px;
+    height: 30px;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: #343942;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 8px;
+    cursor: pointer;
+    font-size: 15px;
+    white-space: nowrap;
+  }
+
+  .format-btn:hover {
+    background: #f2f3f5;
+  }
+
+  .format-btn.active {
+    background: #e8f7f0;
+    color: #12a866;
+  }
+
+  .format-btn :global(svg) {
+    width: 18px;
+    height: 18px;
+  }
+
+  .block-format {
+    position: relative;
+    flex: 0 0 auto;
+  }
+
+  .font-size-picker {
+    position: relative;
+    flex: 0 0 auto;
+  }
+
+  .block-format-trigger {
+    height: 30px;
+    min-width: 86px;
+    border: 0;
+    border-radius: 8px;
+    background: #f4f5f7;
+    color: #1f2329;
+    padding: 0 8px 0 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 3px;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  .font-size-trigger {
+    height: 30px;
+    min-width: 68px;
+    border: 0;
+    border-radius: 8px;
+    background: #f4f5f7;
+    color: #1f2329;
+    padding: 0 7px 0 11px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  .block-format-trigger:hover,
+  .block-format-trigger[aria-expanded="true"] {
+    background: #eef0f3;
+  }
+
+  .font-size-trigger:hover,
+  .font-size-trigger[aria-expanded="true"] {
+    background: #eef0f3;
+  }
+
+  .block-format-trigger :global(svg) {
+    width: 18px;
+    height: 18px;
+    color: #8a8f99;
+  }
+
+  .font-size-trigger :global(svg) {
+    width: 18px;
+    height: 18px;
+    color: #8a8f99;
+  }
+
+  .block-format-menu {
+    position: fixed;
+    z-index: 60;
+    width: 180px;
+    padding: 10px 0;
+    border: 1px solid #eef0f2;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(31, 35, 41, 0.12), 0 2px 8px rgba(31, 35, 41, 0.06);
+  }
+
+  .block-format-menu.collapsed {
+    display: none;
+  }
+
+  .font-size-menu {
+    position: fixed;
+    z-index: 60;
+    width: 112px;
+    max-height: min(520px, 76vh);
+    overflow-y: auto;
+    padding: 10px 0;
+    border: 1px solid #eef0f2;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(31, 35, 41, 0.12), 0 2px 8px rgba(31, 35, 41, 0.06);
+  }
+
+  .font-size-menu.collapsed {
+    display: none;
+  }
+
+  .block-format-item {
+    width: 100%;
+    min-height: 54px;
+    border: 0;
+    background: transparent;
+    color: #24272e;
+    padding: 0 18px 0 16px;
+    display: grid;
+    grid-template-columns: 20px 1fr;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .font-size-item {
+    width: 100%;
+    height: 36px;
+    border: 0;
+    background: transparent;
+    color: #24272e;
+    padding: 0 14px 0 12px;
+    display: grid;
+    grid-template-columns: 18px 1fr;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    text-align: left;
+    font-size: 14px;
+  }
+
+  .block-format-item:hover,
+  .block-format-item.active {
+    background: #f7f8fa;
+  }
+
+  .font-size-item:hover,
+  .font-size-item.active {
+    background: #f7f8fa;
+  }
+
+  .block-format-item .check {
+    color: #1f2329;
+    font-size: 18px;
+    opacity: 0;
+  }
+
+  .font-size-item .check {
+    color: #1f2329;
+    font-size: 16px;
+    opacity: 0;
+  }
+
+  .block-format-item.active .check {
+    opacity: 1;
+  }
+
+  .font-size-item.active .check {
+    opacity: 1;
+  }
+
+  .block-format-item .sample {
+    font-weight: 800;
+    letter-spacing: 0;
+    color: #252932;
+  }
+
+  .font-size-item .value {
+    font-size: 14px;
+    color: #2a2f38;
+    line-height: 1;
+  }
+
+  .block-format-item .sample.normal {
+    font-size: 22px;
+  }
+
+  .block-format-item .sample.h1 {
+    font-size: 28px;
+  }
+
+  .block-format-item .sample.h2 {
+    font-size: 24px;
+  }
+
+  .block-format-item .sample.h3 {
+    font-size: 21px;
+  }
+
+  .block-format-item .sample.h4 {
+    font-size: 18px;
+  }
+
+  .block-format-item .sample.h5 {
+    font-size: 16px;
+  }
+
+  .block-format-item .sample.h6 {
+    font-size: 15px;
+  }
+
+  .format-btn.green {
+    width: 24px;
+    min-width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    padding: 0;
+    background: #12b76a;
+    color: #fff;
+    font-weight: 800;
+  }
+
+  .format-btn.strong {
+    font-weight: 800;
+  }
+
+  .format-btn.italic {
+    font-style: italic;
+  }
+
+  .format-btn.strike {
+    text-decoration: line-through;
+  }
+
+  .format-sep {
+    width: 1px;
+    height: 20px;
+    margin: 0 6px;
+    background: #edf0f2;
+    flex: 0 0 auto;
   }
 
   .meta-panel {
@@ -710,30 +1587,102 @@ import { siteConfig } from "@/config";
     min-height: 0;
     background: #fff;
     cursor: text;
-    overflow: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   #post-body {
     display: block;
     width: 100%;
-    height: 100%;
-    min-height: 0;
+    min-height: calc(100% + var(--writing-space, 360px));
     margin: 0;
-    padding: 56px 72px var(--writing-space, 45vh);
+    padding: 8px 72px var(--writing-space, 45vh);
     border: 0;
     outline: 0;
     resize: none;
-    overflow-y: auto;
     cursor: text;
     color: #202124;
     font-size: 19px;
     line-height: 1.9;
-    font-family: "JetBrains Mono", Consolas, "Microsoft YaHei", monospace;
+    font-family: Inter, "Microsoft YaHei", system-ui, sans-serif;
+  }
+
+  #post-body:empty::before {
+    content: attr(data-placeholder);
+    color: #b5bac1;
+  }
+
+  #post-body > :first-child {
+    margin-top: 0;
+  }
+
+  #post-body h1,
+  #post-body h2,
+  #post-body h3,
+  #post-body h4,
+  #post-body h5,
+  #post-body h6 {
+    line-height: 1.35;
+    margin: 1.1em 0 0.45em;
+    font-weight: 800;
+  }
+
+  #post-body h1 {
+    font-size: 2rem;
+  }
+
+  #post-body h2 {
+    font-size: 1.55rem;
+  }
+
+  #post-body h3 {
+    font-size: 1.25rem;
+  }
+
+  #post-body h4 {
+    font-size: 1.12rem;
+  }
+
+  #post-body h5 {
+    font-size: 1rem;
+  }
+
+  #post-body h6 {
+    font-size: 0.92rem;
+    color: #59616d;
+  }
+
+  #post-body blockquote {
+    border-left: 4px solid #12b76a;
+    margin: 1em 0;
+    padding-left: 1em;
+    color: #59616d;
+  }
+
+  #post-body code {
+    border-radius: 5px;
+    background: #f2f3f5;
+    padding: 0.1em 0.35em;
+    font-family: "JetBrains Mono", Consolas, monospace;
+  }
+
+  #post-body pre {
+    border-radius: 10px;
+    background: #202124;
+    color: #fff;
+    padding: 14px 16px;
+    overflow: auto;
+  }
+
+  #post-body hr {
+    border: 0;
+    border-top: 1px solid #e5e7eb;
+    margin: 1.5em 0;
   }
 
   @media (max-width: 980px) {
     #post-body {
-      padding: 40px 28px 96px;
+      padding: 8px 28px 96px;
     }
   }
 

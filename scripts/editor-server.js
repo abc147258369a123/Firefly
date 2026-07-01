@@ -1,6 +1,8 @@
 import fs from "node:fs/promises";
 import fsSync from "node:fs";
+import { execFile as execFileCallback } from "node:child_process";
 import http from "node:http";
+import { promisify } from "node:util";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
@@ -10,6 +12,7 @@ const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, "..");
 const postsDir = path.join(rootDir, "src", "content", "posts");
 const port = Number(process.env.FIREFLY_EDITOR_PORT || process.env.PORT || 8789);
+const execFile = promisify(execFileCallback);
 
 const fields = [
 	"title",
@@ -258,6 +261,72 @@ function quoteYaml(value) {
 	return JSON.stringify(text);
 }
 
+async function runGit(args) {
+	try {
+		const { stdout, stderr } = await execFile("git", args, {
+			cwd: rootDir,
+			windowsHide: true,
+		});
+		return { stdout: stdout.trim(), stderr: stderr.trim() };
+	} catch (error) {
+		const message = error.stderr?.trim() || error.stdout?.trim() || error.message || "Git 命令执行失败。";
+		throw new Error(message);
+	}
+}
+
+function buildCommitMessage(postPath, title) {
+	const fallback = path.basename(postPath, path.extname(postPath));
+	const subject = String(title || fallback).trim().replace(/\s+/g, " ").slice(0, 60) || fallback;
+	return `publish: ${subject}`;
+}
+
+async function getAheadCount(branch) {
+	try {
+		await runGit(["fetch", "origin", branch]);
+		const counts = await runGit(["rev-list", "--left-right", "--count", `origin/${branch}...${branch}`]);
+		const parts = counts.stdout.split(/\s+/).map((item) => Number(item));
+		return Number.isFinite(parts[1]) ? parts[1] : 0;
+	} catch {
+		return 0;
+	}
+}
+
+async function publishPost(postPath, title) {
+	const target = normalizePostPath(postPath);
+	const repoRelativePath = path.relative(rootDir, target.fullPath).replaceAll(path.sep, "/");
+	if (!fsSync.existsSync(target.fullPath)) {
+		throw new Error("当前文章文件不存在，先保存后再上传。");
+	}
+
+	const branch = (await runGit(["rev-parse", "--abbrev-ref", "HEAD"])).stdout || "main";
+	await runGit(["add", "--", repoRelativePath]);
+
+	const staged = await runGit(["diff", "--cached", "--name-only", "--", repoRelativePath]);
+	let commitMessage = "";
+	if (staged.stdout) {
+		commitMessage = buildCommitMessage(target.relative, title);
+		await runGit(["commit", "-m", commitMessage, "--", repoRelativePath]);
+	}
+
+	const aheadCount = await getAheadCount(branch);
+	if (aheadCount <= 0) {
+		throw new Error("当前文章没有新的已保存修改可上传。");
+	}
+
+	await runGit(["push", "origin", branch]);
+	const remainingAheadCount = await getAheadCount(branch);
+	if (remainingAheadCount > 0) {
+		throw new Error(`GitHub 还差 ${remainingAheadCount} 个本地提交没有收到，请重试上传。`);
+	}
+
+	return {
+		path: target.relative,
+		branch,
+		commitMessage,
+		pushedCommits: aheadCount,
+	};
+}
+
 async function handleApi(req, res, url) {
 	try {
 		if (req.method === "GET" && url.pathname === "/api/posts") {
@@ -299,6 +368,12 @@ async function handleApi(req, res, url) {
 			const target = normalizePostPath(payload.path);
 			await fs.unlink(target.fullPath);
 			return sendJson(res, 200, { ok: true });
+		}
+
+		if (req.method === "POST" && url.pathname === "/api/publish") {
+			const payload = await readBody(req);
+			const result = await publishPost(payload.path, payload.title);
+			return sendJson(res, 200, { ok: true, ...result });
 		}
 
 		return sendJson(res, 404, { error: "接口不存在。" });
